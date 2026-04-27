@@ -1,0 +1,211 @@
+:root {
+  --bg: #f6f7fb;
+  --card: #fff;
+  --text: #1a1a1a;
+  --muted: #5c5c5c;
+  --accent: #2563eb;
+  --danger: #c62828;
+  --border: #e2e6ef;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+h1 {
+  font-size: 1.35rem;
+  font-weight: 650;
+  margin: 0 0 0.25rem;
+}
+
+.results-title {
+  font-size: 1.1rem;
+  margin: 0 0 1rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.35rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.passage {
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  padding: 0.55rem 1rem;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+button.secondary {
+  background: #fff;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button.danger {
+  background: var(--danger);
+}
+
+.status {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-top: 0.75rem;
+  min-height: 1.4em;
+}
+
+.metrics {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.metric strong {
+  display: block;
+  font-size: 1.4rem;
+  color: var(--accent);
+}
+
+.metric span {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.diff-out-wrap {
+  margin-top: 0.25rem;
+}
+
+/* Một đoạn chảy giống văn bản — không bóc block từng lỗi */
+.diff-flow {
+  font-size: 1.05rem;
+  line-height: 1.9;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  padding: 0.85rem 1rem;
+  background: var(--bg);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.diff-ok {
+  color: var(--text);
+}
+
+/* Sai: đáp án đúng nhỏ phía trên, đọc sai đỏ + gạch chân phía dưới (inline) */
+.diff-fix {
+  display: inline-block;
+  vertical-align: text-bottom;
+  margin: 0 0.08em;
+  max-width: 100%;
+}
+
+.diff-fix-ref {
+  display: block;
+  font-size: 0.68em;
+  line-height: 1.15;
+  color: #1565c0;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  border-bottom: 1px solid rgba(198, 40, 40, 0.45);
+  padding: 0 2px 1px;
+}
+
+.diff-fix-bad {
+  display: block;
+  font-size: 1em;
+  line-height: 1.35;
+  color: var(--danger);
+  font-weight: 650;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+  padding: 0 2px;
+}
+
+/* Thiếu từ trong kịch bản */
+.diff-miss {
+  display: inline-block;
+  vertical-align: text-bottom;
+  margin: 0 0.08em;
+}
+
+.diff-miss-ref {
+  display: block;
+  font-size: 0.68em;
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--danger);
+}
+
+.diff-miss-gap {
+  display: block;
+  font-size: 0.85em;
+  color: var(--danger);
+  font-style: italic;
+}
+
+/* Thừa từ (không có trong kịch bản) */
+.diff-extra {
+  display: inline-block;
+  vertical-align: text-bottom;
+  margin: 0 0.08em;
+}
+
+.diff-extra-tag {
+  display: block;
+  font-size: 0.62em;
+  color: var(--muted);
+  line-height: 1.1;
+  text-transform: lowercase;
+}
+
+.diff-extra-bad {
+  display: block;
+  color: var(--danger);
+  font-weight: 650;
+  text-decoration: underline;
+}
+
+.hidden {
+  display: none !important;
+}

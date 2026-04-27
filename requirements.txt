@@ -10,3 +10,6 @@ faster-whisper>=1.0.0
 sounddevice
 soundfile
 pydantic>=2
+django>=5.0
+djangorestframework>=3.15
+edge-tts>=6.0

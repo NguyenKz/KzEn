@@ -1,0 +1,268 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KzEn — Đọc & so sánh</title>
+  <link rel="stylesheet" href="{% static 'compare/app.css' %}">
+</head>
+<body>
+  <div class="wrap">
+    <h1>Đọc thử & so sánh</h1>
+
+    <div class="card">
+      <p class="passage" id="ref-passage">{{ passage }}</p>
+      <div class="actions">
+        <button type="button" class="secondary" id="btn-sample">Nghe mẫu</button>
+        <button type="button" id="btn-record">Ghi âm</button>
+        <button type="button" class="danger" id="btn-stop" disabled>Dừng</button>
+      </div>
+      <p class="status" id="status"></p>
+    </div>
+
+    <div class="card hidden" id="results">
+      <h2 class="results-title">Kết quả</h2>
+      <div class="metrics">
+        <div class="metric">
+          <strong id="m-iou">—</strong>
+          <span>IoU</span>
+        </div>
+        <div class="metric">
+          <strong id="m-level">—</strong>
+          <span>Mức</span>
+        </div>
+      </div>
+      <div class="diff-out-wrap" id="diff-out"></div>
+    </div>
+  </div>
+
+  {% csrf_token %}
+  <script>
+(function () {
+  const passageEl = document.getElementById('ref-passage');
+  const statusEl = document.getElementById('status');
+  const btnSample = document.getElementById('btn-sample');
+  const btnRecord = document.getElementById('btn-record');
+  const btnStop = document.getElementById('btn-stop');
+  const resultsEl = document.getElementById('results');
+  const mIou = document.getElementById('m-iou');
+  const mLevel = document.getElementById('m-level');
+  const diffOut = document.getElementById('diff-out');
+  const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  let sampleAudio = null;
+  let sampleObjectUrl = null;
+
+  function stopSamplePlayback() {
+    if (sampleAudio) {
+      try {
+        sampleAudio.pause();
+      } catch (e) { /* ignore */ }
+      sampleAudio = null;
+    }
+    if (sampleObjectUrl) {
+      URL.revokeObjectURL(sampleObjectUrl);
+      sampleObjectUrl = null;
+    }
+  }
+
+  btnSample.addEventListener('click', async function () {
+    if (btnSample.disabled) return;
+    stopSamplePlayback();
+    const text = passageEl.textContent.trim();
+    statusEl.textContent = '';
+    btnSample.disabled = true;
+    try {
+      const r = await fetch('{% url "api_tts" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        body: JSON.stringify({ text: text }),
+      });
+      if (!r.ok) {
+        const t = await r.text();
+        throw new Error(t || r.statusText);
+      }
+      const blob = await r.blob();
+      sampleObjectUrl = URL.createObjectURL(blob);
+      const audio = new Audio(sampleObjectUrl);
+      sampleAudio = audio;
+      audio.onended = function () {
+        stopSamplePlayback();
+        btnSample.disabled = false;
+        statusEl.textContent = '';
+      };
+      audio.onerror = function () {
+        stopSamplePlayback();
+        btnSample.disabled = false;
+        statusEl.textContent = 'Lỗi phát audio.';
+      };
+      await audio.play();
+      statusEl.textContent = '';
+    } catch (e) {
+      stopSamplePlayback();
+      statusEl.textContent = 'Lỗi TTS: ' + e.message;
+      btnSample.disabled = false;
+    }
+  });
+
+  let mediaRecorder = null;
+  let chunks = [];
+
+  btnRecord.addEventListener('click', async function () {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      chunks = [];
+      let recOpts = undefined;
+      if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        recOpts = { mimeType: 'audio/webm;codecs=opus' };
+      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+        recOpts = { mimeType: 'audio/webm' };
+      }
+      mediaRecorder = recOpts
+        ? new MediaRecorder(stream, recOpts)
+        : new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = function (e) {
+        if (e.data.size) chunks.push(e.data);
+      };
+      mediaRecorder.onstop = function () {
+        stream.getTracks().forEach(function (t) { t.stop(); });
+      };
+      mediaRecorder.start();
+      btnRecord.disabled = true;
+      btnStop.disabled = false;
+      statusEl.textContent = '';
+    } catch (e) {
+      statusEl.textContent = 'Không bật được mic: ' + e.message;
+    }
+  });
+
+  btnStop.addEventListener('click', async function () {
+    if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+    btnStop.disabled = true;
+    statusEl.textContent = '';
+
+    mediaRecorder.stop();
+    await new Promise(function (resolve) {
+      mediaRecorder.addEventListener('stop', resolve, { once: true });
+    });
+
+    const blob = new Blob(chunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+    const fd = new FormData();
+    fd.append('reference_text', passageEl.textContent.trim());
+    fd.append('audio', blob, 'clip.webm');
+
+    try {
+      const r = await fetch('{% url "api_compare" %}', {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrftoken },
+        body: fd,
+      });
+      const data = await r.json();
+      if (!r.ok) {
+        throw new Error(data.detail || JSON.stringify(data));
+      }
+      showResults(data);
+      statusEl.textContent = '';
+    } catch (e) {
+      statusEl.textContent = 'Lỗi: ' + e.message;
+    } finally {
+      btnRecord.disabled = false;
+      btnStop.disabled = true;
+    }
+  });
+
+  const LEVEL_VI = {
+    excellent: 'Xuất sắc',
+    good: 'Tốt',
+    average: 'Trung bình',
+    bad: 'Kém',
+    poor: 'Rất kém',
+  };
+
+  function showResults(data) {
+    resultsEl.classList.remove('hidden');
+    const c = data.compare;
+    mIou.textContent = String(c.iou);
+    mLevel.textContent = LEVEL_VI[c.iou_level] || c.iou_level;
+    diffOut.textContent = '';
+    diffOut.appendChild(renderInlineDiffFlow(c.diff_results || []));
+  }
+
+  /** Một dòng chảy: đúng = đen; sai = đáp án trên + đọc sai dưới (đỏ, gạch chân). */
+  function renderInlineDiffFlow(results) {
+    const flow = document.createElement('div');
+    flow.className = 'diff-flow';
+    results.forEach(function (d) {
+      const typ = d.type;
+      if (typ === 'equal') {
+        const txt = (d.ref_text || d.stt_text || '').trim();
+        if (!txt) return;
+        const s = document.createElement('span');
+        s.className = 'diff-ok';
+        s.textContent = txt + ' ';
+        flow.appendChild(s);
+        return;
+      }
+      if (typ === 'replace') {
+        const refT = (d.ref_text || '').trim();
+        const badT = (d.stt_text || '').trim();
+        if (!refT && !badT) return;
+        const box = document.createElement('span');
+        box.className = 'diff-fix';
+        const refEl = document.createElement('span');
+        refEl.className = 'diff-fix-ref';
+        refEl.textContent = refT || '—';
+        const badEl = document.createElement('span');
+        badEl.className = 'diff-fix-bad';
+        badEl.textContent = badT || '—';
+        box.appendChild(refEl);
+        box.appendChild(badEl);
+        flow.appendChild(box);
+        flow.appendChild(document.createTextNode(' '));
+        return;
+      }
+      if (typ === 'delete') {
+        const refT = (d.ref_text || '').trim();
+        if (!refT) return;
+        const box = document.createElement('span');
+        box.className = 'diff-miss';
+        const refEl = document.createElement('span');
+        refEl.className = 'diff-miss-ref';
+        refEl.textContent = refT;
+        const gap = document.createElement('span');
+        gap.className = 'diff-miss-gap';
+        gap.textContent = '(thiếu)';
+        box.appendChild(refEl);
+        box.appendChild(gap);
+        flow.appendChild(box);
+        flow.appendChild(document.createTextNode(' '));
+        return;
+      }
+      if (typ === 'insert') {
+        const badT = (d.stt_text || '').trim();
+        if (!badT) return;
+        const box = document.createElement('span');
+        box.className = 'diff-extra';
+        const tag = document.createElement('span');
+        tag.className = 'diff-extra-tag';
+        tag.textContent = 'thừa';
+        const badEl = document.createElement('span');
+        badEl.className = 'diff-extra-bad';
+        badEl.textContent = badT;
+        box.appendChild(tag);
+        box.appendChild(badEl);
+        flow.appendChild(box);
+        flow.appendChild(document.createTextNode(' '));
+        return;
+      }
+    });
+    return flow;
+  }
+})();
+  </script>
+</body>
+</html>

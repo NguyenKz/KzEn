@@ -24,12 +24,15 @@ Lần đầu chạy **faster-whisper** / **forcealign** có thể tải model (c
 
 Chạy từ **thư mục gốc repo** (để đường dẫn `kz_dataset/`, `sample.wav` đúng).
 
-| Mục đích | Lệnh |
-|----------|------|
-| UI: ghi âm một đoạn + ForceAlign | `python -m kzen.app_ui` |
-| UI: dataset 10 câu → WAV + `manifest.json` | `python -m kzen.dataset_ui` |
-| STT: ghi `stt_text` vào manifest | `python -m kzen.stt` (mặc định `kz_dataset/manifest.json`) |
-| Ví dụ align | `python -m kzen.main` (cần `sample.wav`) |
+| Mục đích                                   | Lệnh                                                       |
+| ------------------------------------------ | ---------------------------------------------------------- |
+| UI: ghi âm một đoạn + ForceAlign           | `python -m kzen.app_ui`                                    |
+| UI: dataset 10 câu → WAV + `manifest.json` | `python -m kzen.dataset_ui`                                |
+| STT: ghi `stt_text` vào manifest           | `python -m kzen.stt` (mặc định `kz_dataset/manifest.json`) |
+| Ví dụ align                                | `python -m kzen.main` (cần `sample.wav`)                   |
+| Web: đọc thử + STT + so sánh + TTS mẫu     | `python manage.py runserver` → http://127.0.0.1:8000/      |
+
+**Web (Django):** `manage.py` cùng cấp README. Cần **ffmpeg** trên PATH (đọc WebM từ trình duyệt). TTS: **edge-tts**, cache `media/tts_cache/`. STT: model **tiny** (đổi `KZEN_STT_MODEL` trong `kzen_site/settings.py`).
 
 ## Dataset (`kz_dataset/`)
 
@@ -39,19 +42,21 @@ Chạy từ **thư mục gốc repo** (để đường dẫn `kz_dataset/`, `sam
 
 ## Cấu trúc chính
 
-| Đường dẫn | Mô tả |
-|-----------|--------|
-| `src/kzen/` | Package Python `kzen` |
-| `src/kzen/utils.py` | Mic, WAV, ForceAlign, `compare_text`, … |
-| `src/kzen/configs.py` | Hằng số + `DIFFLIB_OPCODE_TO_DIFF_TYPE`, `repo_root()` |
-| `src/kzen/enums.py` | `DiffType`, `IouLevel` |
-| `src/kzen/schemas.py` | Pydantic: `DiffResult`, `CompareResult` |
-| `src/kzen/app_ui.py` | Tkinter: ghi âm + align |
-| `src/kzen/dataset_ui.py` | Tkinter: 10 câu + manifest |
-| `src/kzen/stt.py` | faster-whisper → manifest |
-| `pyproject.toml` | Cấu hình setuptools / `pip install -e .` |
-| `notebook_001.ipynb` | Notebook: dùng `from kzen.utils import …` (cần đã `pip install -e .`) |
-| `journal/` | Nhật ký — `journal/README.md` |
+| Đường dẫn                | Mô tả                                                                 |
+| ------------------------ | --------------------------------------------------------------------- |
+| `src/kzen/`              | Package Python `kzen`                                                 |
+| `src/kzen/utils.py`      | Mic, WAV, ForceAlign, `compare_text`, …                               |
+| `src/kzen/configs.py`    | Hằng số + `DIFFLIB_OPCODE_TO_DIFF_TYPE`, `repo_root()`                |
+| `src/kzen/enums.py`      | `DiffType`, `IouLevel`                                                |
+| `src/kzen/schemas.py`    | Pydantic: `DiffResult`, `CompareResult`                               |
+| `src/kzen/app_ui.py`     | Tkinter: ghi âm + align                                               |
+| `src/kzen/dataset_ui.py` | Tkinter: 10 câu + manifest                                            |
+| `src/kzen/stt.py`        | faster-whisper → manifest                                             |
+| `pyproject.toml`         | Cấu hình setuptools / `pip install -e .`                              |
+| `manage.py`, `kzen_site/` | Django: settings, urls                                                |
+| `compare/`               | App web: template, REST so sánh, TTS                                  |
+| `notebook_001.ipynb`     | Notebook: dùng `from kzen.utils import …` (cần đã `pip install -e .`) |
+| `journal/`               | Nhật ký — `journal/README.md`                                         |
 
 ## Ghi chú
 
