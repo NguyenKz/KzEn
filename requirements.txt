@@ -1,0 +1,9 @@
+# Cài: pip install -r requirements.txt
+# torchcodec (torchaudio ≥2.9) lấy từ PyTorch CPU; nếu thiếu wheel, thêm:
+#   --extra-index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
+torchcodec>=0.11
+forcealign
+faster-whisper>=1.0.0
+sounddevice
+soundfile

@@ -1,0 +1,66 @@
+{
+  "sample_rate": 16000,
+  "channels": 1,
+  "items": [
+    {
+      "index": 0,
+      "text": "Hello, how are you today?",
+      "wav": "000.wav",
+      "stt_text": "Hello, how are you today?"
+    },
+    {
+      "index": 1,
+      "text": "The quick brown fox jumps over the lazy dog.",
+      "wav": "001.wav",
+      "stt_text": "The quick bro forced zoom over the lazy dock."
+    },
+    {
+      "index": 2,
+      "text": "Please open the window.",
+      "wav": "002.wav",
+      "stt_text": "Please, open the window."
+    },
+    {
+      "index": 3,
+      "text": "I would like a cup of coffee.",
+      "wav": "003.wav",
+      "stt_text": "I would like a cup of coffee."
+    },
+    {
+      "index": 4,
+      "text": "What time is the meeting?",
+      "wav": "004.wav",
+      "stt_text": "What time is the misting?"
+    },
+    {
+      "index": 5,
+      "text": "She sells seashells by the seashore.",
+      "wav": "005.wav",
+      "stt_text": "She's self, she's self by the R.C. show."
+    },
+    {
+      "index": 6,
+      "text": "The weather is nice this afternoon.",
+      "wav": "006.wav",
+      "stt_text": "The weather is nice this afternoon."
+    },
+    {
+      "index": 7,
+      "text": "Could you repeat that more slowly?",
+      "wav": "007.wav",
+      "stt_text": "Could you repeat the most slowly?"
+    },
+    {
+      "index": 8,
+      "text": "Thank you for your help.",
+      "wav": "008.wav",
+      "stt_text": "Ten you for your half"
+    },
+    {
+      "index": 9,
+      "text": "See you tomorrow.",
+      "wav": "009.wav",
+      "stt_text": "See you tomorrow"
+    }
+  ]
+}
