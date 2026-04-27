@@ -1,6 +1,6 @@
 """
 UI đơn giản: ghi âm từ mic, nhập transcript, chạy ForceAlign.
-Chạy: python app_ui.py
+Chạy: python -m kzen.app_ui (từ thư mục repo, sau `pip install -e .`)
 """
 import os
 import threading
@@ -9,7 +9,7 @@ from tkinter import ttk, messagebox, scrolledtext, filedialog
 
 import numpy as np
 
-from utils import (
+from .utils import (
     CHANNELS,
     SD_DTYPE,
     SAMPLE_RATE,

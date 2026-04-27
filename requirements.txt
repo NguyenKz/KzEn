@@ -1,4 +1,6 @@
-# Cài: pip install -r requirements.txt
+# Cài phụ thuộc + package (để import kzen):
+#   pip install -r requirements.txt
+#   pip install -e .
 # torchcodec (torchaudio ≥2.9) lấy từ PyTorch CPU; nếu thiếu wheel, thêm:
 #   --extra-index-url https://download.pytorch.org/whl/cpu
 --extra-index-url https://download.pytorch.org/whl/cpu
@@ -7,3 +9,4 @@ forcealign
 faster-whisper>=1.0.0
 sounddevice
 soundfile
+pydantic>=2

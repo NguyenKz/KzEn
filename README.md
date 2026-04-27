@@ -13,37 +13,47 @@ cd KzEn
 python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+pip install -e .
 ```
+
+`pip install -e .` đăng ký package **`kzen`** từ thư mục `src/kzen/` (import được `kzen.utils`, chạy được `python -m kzen.app_ui`, …).
 
 Lần đầu chạy **faster-whisper** / **forcealign** có thể tải model (cần mạng).
 
 ## Chạy nhanh
 
-| Mục đích | Lệnh / file |
-|----------|-------------|
-| UI: ghi âm một đoạn + chạy ForceAlign | `python app_ui.py` |
-| UI: tạo dataset 10 câu → `000.wav`… + `manifest.json` | `python dataset_ui.py` |
-| STT: thêm trường `stt_text` vào `manifest.json` từ các file WAV | `python stt.py` (mặc định `kz_dataset/manifest.json`) |
-| Ví dụ align trong code | `python main.py` (cần `sample.wav` và transcript khớp) |
+Chạy từ **thư mục gốc repo** (để đường dẫn `kz_dataset/`, `sample.wav` đúng).
+
+| Mục đích | Lệnh |
+|----------|------|
+| UI: ghi âm một đoạn + ForceAlign | `python -m kzen.app_ui` |
+| UI: dataset 10 câu → WAV + `manifest.json` | `python -m kzen.dataset_ui` |
+| STT: ghi `stt_text` vào manifest | `python -m kzen.stt` (mặc định `kz_dataset/manifest.json`) |
+| Ví dụ align | `python -m kzen.main` (cần `sample.wav`) |
 
 ## Dataset (`kz_dataset/`)
 
-- `manifest.json`: danh sách `items` với `index`, `text`, `wav` (đường dẫn tương đối), `sample_rate`, …; có thể có thêm `stt_text` sau khi chạy `stt.py`.
-- File âm thanh: `000.wav`, `001.wav`, … (mono 16 kHz khi ghi từ UI).
+- `manifest.json`: danh sách `items` với `index`, `text`, `wav`, …; có thể có `stt_text` sau STT.
+- File âm thanh: `000.wav`, … (mono 16 kHz khi ghi từ UI).
+- UI dataset mặc định lưu vào `kz_dataset/` **ở gốc repo** (`repo_root()` trong `kzen.configs`).
 
 ## Cấu trúc chính
 
 | Đường dẫn | Mô tả |
 |-----------|--------|
-| `utils.py` | Mic, lưu WAV, `force_align` / `try_force_align` |
-| `app_ui.py` | Tkinter: transcript + ghi âm + align |
-| `dataset_ui.py` | Tkinter: 10 dòng câu + ghi âm + manifest |
-| `stt.py` | faster-whisper: đọc WAV, ghi transcript vào manifest |
-| `notebook_001.ipynb` | Thử nghiệm / phân tích (nếu có) |
-| `journal/` | Nhật ký từng bước (Markdown) — xem `journal/README.md` |
-| `.cursor/skills/project-work-journal/` | Skill Cursor: ghi nhật ký dự án |
+| `src/kzen/` | Package Python `kzen` |
+| `src/kzen/utils.py` | Mic, WAV, ForceAlign, `compare_text`, … |
+| `src/kzen/configs.py` | Hằng số + `DIFFLIB_OPCODE_TO_DIFF_TYPE`, `repo_root()` |
+| `src/kzen/enums.py` | `DiffType`, `IouLevel` |
+| `src/kzen/schemas.py` | Pydantic: `DiffResult`, `CompareResult` |
+| `src/kzen/app_ui.py` | Tkinter: ghi âm + align |
+| `src/kzen/dataset_ui.py` | Tkinter: 10 câu + manifest |
+| `src/kzen/stt.py` | faster-whisper → manifest |
+| `pyproject.toml` | Cấu hình setuptools / `pip install -e .` |
+| `notebook_001.ipynb` | Notebook: dùng `from kzen.utils import …` (cần đã `pip install -e .`) |
+| `journal/` | Nhật ký — `journal/README.md` |
 
 ## Ghi chú
 
-- Quyền truy cập **microphone** cần thiết cho các UI ghi âm.
-- Báo cáo / tổng hợp tiến độ: dùng các file trong `journal/steps/`.
+- Cần quyền **microphone** cho các UI ghi âm.
+- Báo cáo: `journal/steps/`.

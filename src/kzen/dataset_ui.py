@@ -1,6 +1,6 @@
 """
 UI tạo dataset: 10 câu tiếng Anh, mỗi câu ghi âm → WAV + manifest.json.
-Chạy: python dataset_ui.py
+Chạy: python -m kzen.dataset_ui (từ thư mục repo, sau `pip install -e .`)
 """
 from __future__ import annotations
 
@@ -12,7 +12,8 @@ from tkinter import filedialog, messagebox, ttk
 
 import numpy as np
 
-from utils import (
+from .configs import repo_root
+from .utils import (
     CHANNELS,
     SD_DTYPE,
     SAMPLE_RATE,
@@ -41,7 +42,7 @@ class DatasetBuilderApp(tk.Tk):
         super().__init__()
         self.title("KzEn — Tạo dataset (text + WAV)")
         self.minsize(720, 520)
-        self._out_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "kz_dataset")
+        self._out_dir = os.path.join(repo_root(), "kz_dataset")
         self._recording_index: int | None = None
         self._record_frames: list[np.ndarray] = []
         self._stream = None
